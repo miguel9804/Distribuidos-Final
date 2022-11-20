@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using Photon.Pun;
+using UnityEngine.SceneManagement;
 
-public class PlayerMovemnt : MonoBehaviour
+public class PlayerMovemnt : MonoBehaviourPunCallbacks
 {
     CharacterController chController;
     public float movementSpeed;
@@ -17,8 +18,13 @@ public class PlayerMovemnt : MonoBehaviour
     //private MeshFilter _meshFilter;
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI pointsText;
-    private int points = 100;
+    public GameObject coins;
+    public GameObject win;
+    public GameObject lose;
+    private int points = 0;
     public PhotonView view;
+    private float time = 5f;
+    private bool terminado = false;
     //private int mySkin;
 
     private void Start()
@@ -27,12 +33,11 @@ public class PlayerMovemnt : MonoBehaviour
         view = GetComponent<PhotonView>();
         //_meshFilter = GetComponent<MeshFilter>();
         chController = GetComponent<CharacterController>();
-        //_meshFilter.mesh = characterMeshes[PlayerPrefs.GetInt("skin")];
-        //CustomPlayer("Juanito", 0);
-        /*if (view.IsMine)
+        if(view.IsMine)
         {
-            view.RPC("PickCharacterRPC", RpcTarget.AllBuffered, mySkin);
-        }*/
+            view.RPC("SetCoin", RpcTarget.All);
+        }
+
     }
 
     /*[PunRPC]
@@ -44,12 +49,26 @@ public class PlayerMovemnt : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Coin"))
+        if (other.CompareTag("Coin") && view.IsMine)
         {
             Destroy(other.gameObject);
             points += 100;
             pointsText.text = points.ToString();
         }
+    }
+    [PunRPC]
+    void SetCoin()
+    {
+        coins.SetActive(true);
+    }
+
+    [PunRPC]
+    void Win()
+    {
+        terminado = true;
+        movementSpeed=0f;
+
+        //Time.timeScale = 0f;
     }
 
     private void Update()
@@ -69,8 +88,39 @@ public class PlayerMovemnt : MonoBehaviour
                 movementSpeed = movementSpeed / 2;
 
             }
+            if (points >= 600)
+            {
+                view.RPC("Win", RpcTarget.All); 
+            }
+        }
+        if (terminado == true)
+        {
+            if(view.IsMine)
+            {
+                if (points >= 600)
+                {
+                    win.SetActive(true);
+                    time -= 1 * Time.deltaTime;
+                    if (time <= 0)
+                    {
+                        PhotonNetwork.JoinLobby();
+                        SceneManager.LoadScene("Lobby");
+                    }
+                }
+                else
+                {
+                    lose.SetActive(true);
+                    time -= 1 * Time.deltaTime;
+                    if (time <= 0)
+                    {
+                        PhotonNetwork.JoinLobby();
+                        SceneManager.LoadScene("Lobby");
+                    }
+                }
+            }
         }
     }
+ 
 
     void PlayerMovement()
     {

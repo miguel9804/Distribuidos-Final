@@ -42,6 +42,9 @@ MonoBehaviour:
   - PickCharacterRPC
   - RespawnSpaceship
   - SetBarrier
+  - SetCoin
+  - SetCoin2
+  - Win
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

@@ -14,7 +14,6 @@ public class Barrier : MonoBehaviourPun
         if(photonView.IsMine && Input.GetKeyDown(KeyCode.Space))
         {
             photonView.RPC("SetBarrier", RpcTarget.AllBuffered);
-
         }
     }
 
@@ -23,4 +22,5 @@ public class Barrier : MonoBehaviourPun
     {
         Instantiate(barPrefab, spawnBar);
     }
+    
 }
